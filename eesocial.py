@@ -12,10 +12,16 @@ load_dotenv()
 
 client = MongoClient(os.getenv("MONGODB_URI", "mongodb://localhost:27017/"))
 bd = client.eesocial
-bd.eventos.create_index('id', unique=True)
-bd.eventos.create_index('retorno.recibo.nrRecibo', unique=True)
 cll_arquivos = bd.arquivos
 cll_eventos = bd.eventos
+
+# Indexando coleção de eventos
+chaves_indexadas = []
+for idx in bd.eventos.list_indexes():
+    chaves_indexadas += list(idx['key'].keys())
+if len(chaves_indexadas) == 0:
+    bd.eventos.create_index('id', unique=True)
+    bd.eventos.create_index('retorno.recibo.nrRecibo', unique=True)
 
 compile_tag = re.compile(r"{.+}(?P<tag>\w.+)")
 
